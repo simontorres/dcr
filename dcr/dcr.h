@@ -38,6 +38,6 @@ int   make_hist(int, int, float **, int, int, float, int, float, int *);
 int   detect(PARAMS, float **, int, int, int, int, int, int, char **);
 int   make_map(PARAMS, float **, int, int, char **);
 int   clean(PARAMS, float **, int, int, double, char **, float **);
-int   modify_header(int, char ***);
+int   modify_header(int, char ***, PARAMS);
 
 /*** END ***/

@@ -657,13 +657,14 @@ int clean(PARAMS par, float **data, int naxis1, int naxis2, double mean,
   return(EXIT_SUCCESS);
 }
 /*--------------------------------------------------------*/
-int modify_header(int ncards, char ***header)
+int modify_header(int ncards, char ***header, PARAMS par)
 {
         char  **nheader,
               **lheader,
               ncard[CARD_SIZE],
               ecard[CARD_SIZE],
               val[VALUE_SIZE];
+        char gsp_fnam[55];
         int   i,
               ni,
               nncards,
@@ -738,8 +739,17 @@ int modify_header(int ncards, char ***header)
     return(-1);
   }
 
+  if ((p=get_FITS_key(nncards, nheader, "GSP_FNAM", val)) != -1)
+  {
+    memcpy(ncard, ecard, CARD_SIZE);
+    snprintf(gsp_fnam, sizeof(gsp_fnam), "GSP_FNAM %s / Current file name", par.ocname);
+    printf(strstr(gsp_fnam, "/"));
+    memcpy(ncard, gsp_fnam, 55);
+    memcpy(nheader[p], ncard, CARD_SIZE);
+  }
+
   memcpy(ncard, ecard, CARD_SIZE);
-  memcpy(ncard, "HISTORY = 'dcr    / see Pych, W., 2004, PASP, 116, 148'", 55);
+  memcpy(ncard, "GSP_DCRC dcr  see Pych, W., 2004, PASP, 116, 148", 55);
   memcpy(nheader[nncards-2], ncard, CARD_SIZE);
 
   memcpy(ncard, ecard, CARD_SIZE);
@@ -840,7 +850,7 @@ int main(int argc, char *argv[])
     printf("max count= %f (%d,%d)\n", maxc, xmax+1, ymax+1);
   }
 
-  if ((ncards=modify_header(ncards, &header)) < 1)
+  if ((ncards=modify_header(ncards, &header, par)) < 1)
   { printf("\n\tERROR! modify_header() failed\n"); return(EXIT_FAILURE); }
 
   if (par.vopt) printf("Cleaned frame file: %s\n", par.ocname);
