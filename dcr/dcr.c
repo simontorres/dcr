@@ -664,8 +664,11 @@ int modify_header(int ncards, char ***header, PARAMS par)
               ncard[CARD_SIZE],
               ecard[CARD_SIZE],
               val[VALUE_SIZE];
-        /* char gsp_fnam[55];*/
-        /* char full_name_only[55];*/
+        char gsp_fnam[CARD_SIZE];
+        char gsp_dcr_reference[CARD_SIZE];
+        size_t fnam_size,
+               dcrr_size;
+
         int   i,
               ni,
               nncards,
@@ -740,28 +743,43 @@ int modify_header(int ncards, char ***header, PARAMS par)
     return(-1);
   }
 
-  /*
-  TODO (Simon): This is important since it updates the filename of the file used.
-  */
+  /* Update GSP_FNAM keyword which stores the name used to save the file */
   if ((p=get_FITS_key(nncards, nheader, "GSP_FNAM", val)) != -1)
   {
     memcpy(ncard, ecard, CARD_SIZE);
-    snprintf(full_name_only, sizeof(full_name_only), "%s", par.ocname);
-    printf(full_name_only);
-    strtok(full_name_only, '/');
-    printf(full_name_only);
-    snprintf(gsp_fnam, sizeof(gsp_fnam)+1, ("GSP_FNAM= '%.31s\n' / Current file name "), full_name_only);
-    printf(gsp_fnam);
-    memcpy(ncard, gsp_fnam , sizeof(gsp_fnam));
-    //memcpy(ncard, ("NEWKEY  = 'test' / limit to the comment "), 40);
+
+    if (strrchr(par.ocname, '/') == NULL)
+    {
+        /* if the name was parsed as file name only (not path)*/
+        fnam_size = snprintf(NULL, 0, "GSP_FNAM= '%s' / Current file name", par.ocname) + 1;
+
+        snprintf(gsp_fnam, fnam_size, "GSP_FNAM= '%s' / Current file name", par.ocname);
+    }
+    else
+    {
+        /* if the name was parsed as a full path*/
+        fnam_size = snprintf(NULL, 0, "GSP_FNAM= '%s' / Current file name", &par.ocname[(strrchr(par.ocname, '/') -  par.ocname) + 1]) + 1;
+
+        snprintf(gsp_fnam, fnam_size, "GSP_FNAM= '%s' / Current file name", &par.ocname[(strrchr(par.ocname, '/') -  par.ocname) + 1]);
+    }
+
+    memcpy(ncard, gsp_fnam , strlen(gsp_fnam));
+
     memcpy(nheader[p], ncard, CARD_SIZE);
   }
 
 
+  /* Add DCR reference */
   memcpy(ncard, ecard, CARD_SIZE);
-  memcpy(ncard, "COMMENT  'dcr'  see Pych, W., 2004, PASP, 116, 148", 50);
+
+  dcrr_size = snprintf(NULL, 0, "GSP_DCRR= 'see Pych, W., 2004, PASP, 116, 148' / DCR Reference") + 1;
+
+  snprintf(gsp_dcr_reference, dcrr_size, "GSP_DCRR= 'see Pych, W., 2004, PASP, 116, 148' / DCR Reference");
+
+  memcpy(ncard, gsp_dcr_reference, strlen(gsp_dcr_reference));
   memcpy(nheader[nncards-2], ncard, CARD_SIZE);
 
+  /* END card */
   memcpy(ncard, ecard, CARD_SIZE);
   memcpy(ncard, "END", 3);
   memcpy(nheader[nncards-1], ncard, CARD_SIZE);
