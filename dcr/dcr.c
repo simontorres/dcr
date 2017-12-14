@@ -43,6 +43,9 @@
 /*--------------------------------------------------------*/
 void usage()
 {
+  printf("\n\tThis is a modified version of DCR! for the Goodman Spectroscopic Pipeline");
+  printf("\n\tPlease visit the author's site to get the original version:\n");
+  printf("\n\thttp://users.camk.edu.pl/pych/DCR/\n\n");
   printf("\n\tUSAGE:  dcr  input_file  cleaned_file  cosmicrays_file\n\n");
   printf("File 'dcr.par' must be present in the working directory.\n");
   printf("      ~~~~~~\n");
